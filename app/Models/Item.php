@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Item extends Model
 {
     use SoftDeletes, HasFactory;
-    protected $fillable = ['name', 'description', 'price', 'category_id', 'img', 'is_active', 'created_at', 'updated_at'];
+    protected $fillable = ['name', 'description', 'price', 'categories_id', 'img', 'is_active', 'created_at', 'updated_at'];
     protected $dates = 'deleted_at';
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'categories_id');
     }
 }
