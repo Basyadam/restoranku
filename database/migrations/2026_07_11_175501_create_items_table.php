@@ -16,9 +16,11 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->integer('price');
+            $table->integer('stok')->default(0);
             
             // Menggunakan foreignId yang lebih ringkas dan standar Laravel modern
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignId('categories_id')->constrained();
+            // atau jika manual: $table->unsignedBigInteger('categories_id');
             $table->string('img')->nullable(); // Ditambahkan tanda petik penutup yang hilang (')
             $table->boolean('is_active')->default(true);
             $table->softDeletes();
