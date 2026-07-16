@@ -31,28 +31,18 @@
                                         <p class="text-limited">{{ $item->description }}</p>
                                         <div class="d-flex justify-content-between flex-lg-wrap">
                                             <p class="text-dark fs-5 fw-bold mb-0">{{ 'Rp' . number_format($item->price, 0, ',', '.') }}</p>
-                                            <a href="#" onclick="addToCart({{ $item->id }})" class="btn border border-secondary rounded-pill px-3 text-primary">
-                                                <i class="fa fa-shopping-bag me-2 text-primary"></i> Tambah Keranjang
-                                            </a>
+                                            <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <input type="hidden" name="item_id" value="{{ $item->id }}">
+                                                <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">
+                                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Tambah Keranjang
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             @endforeach
-
-                                    <!-- Pagination -->
-                                    <!-- <div class="col-12">
-                                        <div class="pagination d-flex justify-content-center mt-5">
-                                            <a href="#" class="rounded">&laquo;</a>
-                                            <a href="#" class="active rounded">1</a>
-                                            <a href="#" class="rounded">2</a>
-                                            <a href="#" class="rounded">3</a>
-                                            <a href="#" class="rounded">4</a>
-                                            <a href="#" class="rounded">5</a>
-                                            <a href="#" class="rounded">6</a>
-                                            <a href="#" class="rounded">&raquo;</a>
-                                        </div>
-                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -62,5 +52,3 @@
         </div>
         <!-- Fruits Shop End-->
 @endsection
-
-       
