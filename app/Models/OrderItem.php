@@ -9,16 +9,16 @@ class OrderItem extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'idescription', 'price', 'category', 'created_at', 'updated_at'];
-    protected $dates = 'deleted_at';
+    protected $fillable = ['order_id', 'item_id', 'quantity', 'price', 'tax', 'total_price', 'created_at', 'updated_at'];
+    protected $dates = ['deleted_at'];
 
-    public function catgeory()
+    public function order()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Order::class);
     }
 
-    public function orderIem()  
+    public function item()
     {
-        return $this->belongsTo(OrderItem::class);
+        return $this->belongsTo(Item::class);
     }
 }
