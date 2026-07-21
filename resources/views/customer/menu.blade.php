@@ -29,15 +29,11 @@
                                         <div class="p-4 border border-secondary border-top-0 rounded-bottom">
                                         <h4 class="text-limited">{{ $item->name }}</h4>
                                         <p class="text-limited">{{ $item->description }}</p>
-                                        <div class="d-flex justify-content-between flex-lg-wrap">
+<div class="d-flex justify-content-between flex-lg-wrap">
                                             <p class="text-dark fs-5 fw-bold mb-0">{{ 'Rp' . number_format($item->price, 0, ',', '.') }}</p>
-                                            <form action="{{ route('cart.add') }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <input type="hidden" name="item_id" value="{{ $item->id }}">
-                                                <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">
-                                                    <i class="fa fa-shopping-bag me-2 text-primary"></i> Tambah Keranjang
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn border border-secondary rounded-pill px-3 text-primary add-to-cart-btn" data-item-id="{{ $item->id }}">
+                                                <i class="fa fa-shopping-bag me-2 text-primary"></i> Tambah Keranjang
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -50,5 +46,44 @@
                 </div>
             </div>
         </div>
-        <!-- Fruits Shop End-->
+<!-- Fruits Shop End-->
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        $('.add-to-cart-btn').on('click', function() {
+            var $btn = $(this);
+            var itemId = $btn.data('item-id');
+            var originalText = $btn.html();
+
+            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i> Menambahkan...');
+
+            $.ajax({
+                url: "{{ route('cart.add') }}",
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    item_id: itemId
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $btn.html('<i class="fa fa-check me-2"></i> Ditambahkan');
+                        setTimeout(function() {
+                            $btn.html(originalText).prop('disabled', false);
+                        }, 1500);
+                    } else {
+                        alert('Gagal menambahkan item: ' + response.message);
+                        $btn.html(originalText).prop('disabled', false);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Terjadi kesalahan saat menambahkan ke keranjang.');
+                    $btn.html(originalText).prop('disabled', false);
+                }
+            });
+        });
+    });
+</script>
 @endsection
