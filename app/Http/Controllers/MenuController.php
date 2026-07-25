@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Item;
 use App\Models\Order;
@@ -27,6 +28,7 @@ class MenuController extends Controller
     {
         return view('customer.cart');
     }
+
     public function addToCart(Request $request, $itemId = null)
     {
         $menuId = $request->input('item_id', $request->route('item_id', $itemId));
@@ -74,13 +76,14 @@ class MenuController extends Controller
         return redirect()->route('cart')->with('success', 'Berhasil ditambahkan ke keranjang');
     }
 
-    public function updateCart(Request $request) 
+    public function updateCart(Request $request)
     {
         $itemId = $request->input('id');
-        $newQty = $request->input('qty');
+        $newQty = (int) $request->input('qty');
 
-        if($newQty < 0) {
-            return response()->json(['success' => false]);
+        // qty minimal 1 -- kalau ingin 0, arahkan ke removeFromCart di frontend
+        if ($newQty <= 0) {
+            return response()->json(['success' => false, 'message' => 'Jumlah tidak valid.']);
         }
 
         $cart = Session::get('cart', []);
@@ -88,7 +91,6 @@ class MenuController extends Controller
             $cart[$itemId]['qty'] = $newQty;
             Session::put('cart', $cart);
 
-            // Hitung total keseluruhan
             $subtotal = 0;
             foreach ($cart as $cartItem) {
                 $subtotal += $cartItem['price'] * $cartItem['qty'];
@@ -109,7 +111,7 @@ class MenuController extends Controller
                 'grand_total_formatted' => 'Rp' . number_format($grandTotal, 0, ',', '.'),
             ]);
         }
-        return response()->json(['success' => false]);
+        return response()->json(['success' => false, 'message' => 'Item tidak ditemukan di keranjang.']);
     }
 
     public function removeFromCart(Request $request)
@@ -121,7 +123,6 @@ class MenuController extends Controller
             unset($cart[$itemId]);
             Session::put('cart', $cart);
 
-            // Hitung total keseluruhan setelah dihapus
             $subtotal = 0;
             foreach ($cart as $cartItem) {
                 $subtotal += $cartItem['price'] * $cartItem['qty'];
@@ -140,13 +141,13 @@ class MenuController extends Controller
                 'grand_total_formatted' => 'Rp' . number_format($grandTotal, 0, ',', '.'),
             ]);
         }
-        return response()->json(['success' => false]);
+        return response()->json(['success' => false, 'message' => 'Item tidak ditemukan di keranjang.']);
     }
 
     public function checkout()
     {
         $cartItems = Session::get('cart', []);
-        
+
         if (empty($cartItems)) {
             return redirect()->route('cart')->with('error', 'Keranjang belanja kosong.');
         }
@@ -164,16 +165,16 @@ class MenuController extends Controller
     public function placeOrder(Request $request)
     {
         $cartItems = Session::get('cart', []);
-        
+
         if (empty($cartItems)) {
             return response()->json(['success' => false, 'message' => 'Keranjang kosong.']);
         }
 
         $request->validate([
-            'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'required|string|max:20',
-            'payment_method' => 'required|in:tunai,qris',
-            'note' => 'nullable|string|max:500',
+            'customer_name'   => 'required|string|max:255',
+            'customer_phone'  => 'required|string|max:20',
+            'payment_method'  => 'required|in:tunai,qris',
+            'note'            => 'nullable|string|max:500',
         ]);
 
         // Hitung total
@@ -189,41 +190,92 @@ class MenuController extends Controller
 
         // Buat order
         $order = Order::create([
-            'order_ccode' => $orderCode,
-            'user_id' => 1, // Default user
-            'subtotal' => $subtotal,
-            'tax' => $tax,
-            'grandtotal' => $grandTotal,
-            'status' => 'pending',
-            'table_number' => Session::get('table_number', 0),
-            'payment_method' => $request->payment_method,
-            'note' => $request->note,
+            'order_ccode'     => $orderCode,
+            'user_id'         => Auth::id() ?? 1, // fallback guest, sesuaikan kalau perlu logika lain
+            'subtotal'        => $subtotal,
+            'tax'             => $tax,
+            'grandtotal'      => $grandTotal,
+            'status'          => 'pending',
+            'table_number'    => Session::get('table_number', 0),
+            'payment_method'  => $request->payment_method,
+            'note'            => $request->note,
         ]);
 
         // Simpan order items
         foreach ($cartItems as $item) {
             $itemTotal = $item['price'] * $item['qty'];
             OrderItem::create([
-                'order_id' => $order->id,
-                'item_id' => $item['id'],
-                'quantity' => $item['qty'],
-                'price' => $item['price'],
-                'tax' => $tax,
+                'order_id'    => $order->id,
+                'item_id'     => $item['id'],
+                'quantity'    => $item['qty'],
+                'price'       => $item['price'],
+                'tax'         => $tax,
                 'total_price' => $itemTotal,
             ]);
         }
 
-        // Hapus cart dari session
-        Session::forget('cart');
-
         // Simpan order_code di session untuk halaman sukses
         Session::put('last_order_code', $orderCode);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Pesanan berhasil dibuat!',
-            'order_code' => $orderCode,
-        ]);
+        // Hapus cart dari session
+        Session::forget('cart');
+
+        if ($request->payment_method === 'tunai') {
+            return response()->json([
+                'success' => true,
+            ]);
+        }
+
+        // Pembayaran QRIS via Midtrans
+        $isProduction = config('midtrans.is_production');
+        \Midtrans\Config::$serverKey    = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = $isProduction;
+        \Midtrans\Config::$isSanitized  = true;
+        \Midtrans\Config::$is3ds        = true;
+
+        $itemDetails = [];
+        foreach ($cartItems as $item) {
+            $itemDetails[] = [
+                'id'       => $item['id'],
+                'price'    => (int) $item['price'],
+                'quantity' => $item['qty'],
+                'name'     => $item['name'],
+            ];
+        }
+        // Tambahkan item pajak agar total item_details sama dengan gross_amount
+        $itemDetails[] = [
+            'id'       => 'TAX',
+            'price'    => (int) $tax,
+            'quantity' => 1,
+            'name'     => 'PPN 10%',
+        ];
+
+        $params = [
+            'transaction_details' => [
+                'order_id'     => $order->order_ccode,
+                'gross_amount' => (int) $order->grandtotal,
+            ],
+            'customer_details' => [
+                'first_name' => $request->customer_name,
+                'phone'      => $request->customer_phone,
+            ],
+            'item_details'  => $itemDetails,
+            'enabled_payments' => ['qris'],
+            'callbacks' => [
+                'finish' => route('order.success'),
+            ],
+        ];
+
+        try {
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            return response()->json([
+                'success'    => true,
+                'snap_token' => $snapToken,
+                'order_code' => $order->order_ccode,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function orderSuccess()

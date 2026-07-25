@@ -170,7 +170,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="d-flex justify-content-end">
+            <div class="d-flex justify-content-end">
                                         <button type="submit" class="btn border-secondary py-3 text-uppercase text-primary" id="confirm-btn">Konfirmasi Pesanan</button> 
                                     </div>
                                     
@@ -182,44 +182,91 @@
                 @endif
             </div>
         </div>
-@endsection
 
 @section('scripts')
+    <script src="https://app.{{ config('midtrans.is_production') ? 'midtrans.com' : 'sandbox.midtrans.com' }}/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
     <script>
         $(document).ready(function() {
             $('#checkout-form').on('submit', function(e) {
                 e.preventDefault();
 
-var $btn = $('#confirm-btn');
+                var $btn = $('#confirm-btn');
+                var paymentMethod = $('input[name="payment_method"]:checked').val();
+                var $form = $(this);
+
                 $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i> Memproses...');
 
-                $.ajax({
-                    url: "{{ route('checkout.place') }}",
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            alert('✅ ' + response.message + '\nKode Pesanan: ' + response.order_code);
-                            window.location.href = "{{ route('order.success') }}";
-                        } else {
-                            alert('❌ ' + response.message);
+                if (paymentMethod === 'qris') {
+                    $.ajax({
+                        url: "{{ route('checkout.place') }}",
+                        method: 'POST',
+                        data: $form.serialize(),
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.snap_token) {
+                                snap.pay(response.snap_token, {
+                                    onSuccess: function(result) {
+                                        window.location.href = "{{ route('order.success') }}";
+                                    },
+                                    onPending: function(result) {
+                                        alert('Menunggu pembayaran selesai. Silakan selesaikan pembayaran Anda.');
+                                        window.location.href = "{{ route('order.success') }}";
+                                    },
+                                    onError: function(result) {
+                                        alert('Pembayaran gagal: ' + (result.status_message || 'Terjadi kesalahan'));
+                                        $btn.prop('disabled', false).text('Konfirmasi Pesanan');
+                                    },
+                                    onClose: function() {
+                                        alert('Anda menutup popup pembayaran. Silakan coba lagi.');
+                                        $btn.prop('disabled', false).text('Konfirmasi Pesanan');
+                                    }
+                                });
+                            } else {
+                                alert('Gagal mendapatkan token pembayaran: ' + (response.message || ''));
+                                $btn.prop('disabled', false).text('Konfirmasi Pesanan');
+                            }
+                        },
+                        error: function(xhr) {
+                            var msg = 'Terjadi kesalahan.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                var errors = Object.values(xhr.responseJSON.errors).flat();
+                                msg = errors.join('\n');
+                            }
+                            alert(msg);
                             $btn.prop('disabled', false).text('Konfirmasi Pesanan');
                         }
-                    },
-                    error: function(xhr) {
-                        var msg = 'Terjadi kesalahan.';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            msg = xhr.responseJSON.message;
-                        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            var errors = Object.values(xhr.responseJSON.errors).flat();
-                            msg = errors.join('\n');
+                    });
+                } else {
+                    $.ajax({
+                        url: "{{ route('checkout.place') }}",
+                        method: 'POST',
+                        data: $form.serialize(),
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                window.location.href = "{{ route('order.success') }}";
+                            } else {
+                                alert(response.message);
+                                $btn.prop('disabled', false).text('Konfirmasi Pesanan');
+                            }
+                        },
+                        error: function(xhr) {
+                            var msg = 'Terjadi kesalahan.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                var errors = Object.values(xhr.responseJSON.errors).flat();
+                                msg = errors.join('\n');
+                            }
+                            alert(msg);
+                            $btn.prop('disabled', false).text('Konfirmasi Pesanan');
                         }
-                        alert('❌ ' + msg);
-                        $btn.prop('disabled', false).text('Konfirmasi Pesanan');
-                    }
-                });
+                    });
+                }
             });
         });
     </script>
 @endsection
+
