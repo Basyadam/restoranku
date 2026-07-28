@@ -4,7 +4,7 @@
             <p>{{ date('Y') }} &copy; RestoRanku</p>
         </div>
         <div class="float-end">
-            <p>Powered by <a href="https://laravel.com">Laravel</a></p>
+            <p><a href=""</a></p>
         </div>
     </div>
 </footer>

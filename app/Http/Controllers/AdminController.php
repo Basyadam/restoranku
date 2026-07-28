@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -22,9 +24,57 @@ class AdminController extends Controller
         $ordersToday = Order::whereDate('created_at', today())->count();
         $revenueToday = Order::where('status', 'settlement')->whereDate('created_at', today())->sum('grandtotal');
 
+        // Order status counts
+        $pendingOrders = Order::where('status', 'pending')->count();
+        $settlementOrders = Order::where('status', 'settlement')->count();
+        $cookedOrders = Order::where('status', 'cooked')->count();
+
+        // Monthly revenue for chart (last 6 months)
+        $monthlyRevenue = [];
+        $monthlyLabels = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i);
+            $revenue = Order::where('status', 'settlement')
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->sum('grandtotal');
+            $monthlyRevenue[] = $revenue;
+            $monthlyLabels[] = $month->format('M Y');
+        }
+
+        // Recent orders (last 5)
+        $recentOrders = Order::with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Top selling items
+        $topItems = OrderItem::selectRaw('item_id, SUM(quantity) as total_qty, SUM(total_price) as total_revenue')
+            ->with('item')
+            ->groupBy('item_id')
+            ->orderByDesc('total_qty')
+            ->take(5)
+            ->get();
+
+        // Revenue today chart (hourly breakdown)
+        $hourlyRevenue = [];
+        $hourlyLabels = [];
+        for ($h = 0; $h < 24; $h++) {
+            $hourlyLabels[] = sprintf('%02d:00', $h);
+            $revenue = Order::where('status', 'settlement')
+                ->whereDate('created_at', today())
+                ->whereRaw('HOUR(created_at) = ?', [$h])
+                ->sum('grandtotal');
+            $hourlyRevenue[] = $revenue;
+        }
+
         return view('admin.index', compact(
             'totalOrders', 'totalRevenue', 'totalMenu', 'totalEmployees',
-            'ordersToday', 'revenueToday'
+            'ordersToday', 'revenueToday',
+            'pendingOrders', 'settlementOrders', 'cookedOrders',
+            'monthlyRevenue', 'monthlyLabels',
+            'recentOrders', 'topItems',
+            'hourlyRevenue', 'hourlyLabels'
         ));
     }
 

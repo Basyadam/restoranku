@@ -1,51 +1,29 @@
-# ✅ Admin Template Integration Complete
+# Dashboard Improvement Plan
 
-## What's Fixed
+## ✅ Step 1: Update admin master layout
+- Rewrite `resources/views/admin/layouts/master.blade.php` to use a proper admin layout with sidebar, header, footer (instead of customer theme)
 
-### Route Names Mismatch (ALL FIXED)
-All views now use **matching route names** defined in `routes/web.php`:
+## ✅ Step 2: Update AdminController with chart data
+- Add monthly revenue query for sales chart
+- Add recent orders query
+- Add top-selling items query
+- Add order status counts
+- Add hourly revenue data
 
-| View File | Fixed Routes |
-|-----------|--------------|
-| `__sidebar.blade.php` | `admin.dashboard`, `admin.orders`, `admin.items`, `admin.categories` |
-| `category/index.blade.php` | `admin.categories`, `admin.categories.create`, `admin.categories.edit`, `admin.categories.delete` |
-| `category/create.blade.php` | `admin.categories`, `admin.categories.store` |
-| `category/edit.blade.php` | `admin.categories`, `admin.categories.update` |
-| `item/index.blade.php` | `admin.items` (already correct) |
-| `item/create.blade.php` | `admin.items.store` (already correct) |
-| `item/edit.blade.php` | `admin.items.update` (already correct) |
-| `order/index.blade.php` | `admin.orders`, `admin.orders.update-status` (already correct) |
-| `admin/index.blade.php` | `admin.categories`, `admin.items`, `admin.orders` (already correct) |
+## ✅ Step 3: Redesign dashboard view
+- Rewrite `resources/views/admin/index.blade.php` with:
+  - Modern gradient stat cards
+  - Sales chart (Chart.js)
+  - Recent orders table
+  - Top selling items
+  - Order status summary
+  - Hourly revenue chart
+  - Quick actions
+  - Responsive layout
 
-### Sidebar Auth Fix
-- Added `@auth` / `@endauth` protection
-- Added null guard for `Auth::user()->role`
-
-## Admin Structure
-```
-/admin                  → Dashboard
-/admin/categories       → Manajemen Kategori (CRUD)
-/admin/categories/create → Tambah Kategori
-/admin/categories/{id}/edit → Edit Kategori (DELETE)
-
-/admin/items            → Daftar Menu (CRUD)
-/admin/items/create     → Tambah Menu
-/admin/items/{id}/edit  → Edit Menu
-
-/admin/orders           → Kelola Pesanan (update status)
-/admin/orders/{id}/status → Update: pending → settlement → cooked
-```
-
-## Customer Routes
-```
-/menu        → Menu customer
-/cart        → Keranjang
-/checkout    → Checkout
-/order-success → Halaman sukses
-```
-
-## QRIS Payment (Midtrans) - Also Fixed!
-- ✅ `order_ccode` column name fixed
-- ✅ Snap.js integration with proper callbacks
-- ✅ QRIS & Tunai payment flows separated
+## ✅ Step 4: Test
+- All files have been updated successfully
+- Admin layout clean with sidebar, header, footer
+- Chart.js loaded from local assets
+- Dashboard has gradient cards, charts, recent orders, top items, quick actions
 

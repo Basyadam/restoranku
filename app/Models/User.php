@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,7 +22,14 @@ class User extends Authenticatable
         'updated_at',
     ];
 
-    protected $dates = 'deleted_at';
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'deleted_at' => 'datetime',
+    ];
 
     public function role()
     {
@@ -35,3 +41,4 @@ class User extends Authenticatable
         return $this->hasMany(Order::class);
     }
 }
+

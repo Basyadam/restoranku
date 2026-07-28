@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('subtotal');
             $table->integer('tax');
             $table->integer('grandtotal');
-            $table->enum('status', ['status', 'pending', 'settlement', 'cooked']);
+            $table->enum('status', ['pending', 'settlement', 'cooked']);
             $table->integer('table_number');
             $table->enum('payment_method', ['tunai', 'qris']);
             $table->text('note')->nullable();
@@ -36,3 +36,4 @@ return new class extends Migration
         Schema::dropIfExists('orders');
     }
 };
+

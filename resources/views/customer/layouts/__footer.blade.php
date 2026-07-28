@@ -10,10 +10,10 @@
                         </div>
                         <div class="col-lg-6">
                             <div class="d-flex justify-content-end pt-3">
-                                <a class="btn  btn-outline-secondary me-2 btn-md-square rounded-circle" href="https://www.instagram.com/codepolitan/"><i class="fab fa-instagram"></i></a>
-                                <a class="btn  btn-outline-secondary me-2 btn-md-square rounded-circle" href="https://tiktok.com/@codepolitan.com"><i class="fab fa-tiktok"></i></a>
-                                <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href="https://www.youtube.com/@codepolitan"><i class="fab fa-youtube"></i></a>
-                                <a class="btn btn-outline-secondary btn-md-square rounded-circle" href="https://id.linkedin.com/company/codepolitan"><i class="fab fa-linkedin-in"></i></a>
+                                <a class="btn  btn-outline-secondary me-2 btn-md-square rounded-circle" href="https://www.instagram.com//"><i class="fab fa-instagram"></i></a>
+                                <a class="btn  btn-outline-secondary me-2 btn-md-square rounded-circle" href="https://tiktok.com"><i class="fab fa-tiktok"></i></a>
+                                <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href="https://www.youtube.com/"><i class="fab fa-youtube"></i></a>
+                                <a class="btn btn-outline-secondary btn-md-square rounded-circle" href=""><i class="fab fa-linkedin-in"></i></a>
                             </div>
                         </div>
                     </div>
@@ -29,8 +29,8 @@
                         <div class="footer-item">
                             <h4 class="text-light mb-3">Hubungi Kami</h4>
                             <p>Alamat: Jl. Sangkuriang No.8, Padasuka, Kec. Cimahi Tengah, Kota Cimahi, Jawa Barat 40526</p>
-                            <p>Email: info@codepolitan.com</p>
-                            <p>Telp: 0899-9488-990</p>
+                            <p>Email:</p>
+                            <p>Telp: </p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6">
@@ -49,13 +49,13 @@
             <div class="container">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Restoranku</a> <span id="currentYear"></span>. All right reserved.</span>
+                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Restoranku</a> <span id="currentYear"></span>.</span>
                     </div>
                     <div class="col-md-6 my-auto text-center text-md-end text-white">
                         <!--/*** This template is free as long as you keep the below author’s credit link/attribution link/backlink. ***/-->
                         <!--/*** If you'd like to use the template without the below author’s credit link/attribution link/backlink, ***/-->
                         <!--/*** you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". ***/-->
-                        Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a> Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
+                     <a class="border-bottom" href="https://htmlcodex.com"></a>  <a class="border-bottom" href="https://themewagon.com"></a>
                     </div>
                 </div>
             </div>
