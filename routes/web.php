@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
         Route::delete('/roles/{id}', [RoleController::class, 'delete'])->name('roles.delete');
 
+        
         // Employees
         Route::get('/employees', [EmployeeController::class, 'index'])->name('employees');
         Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');

@@ -27,7 +27,7 @@
                     <p class="text-muted">Belum ada menu. Silakan tambah menu baru.</p>
                 </div>
             @else
-            <div class="table-responsive">
+            <div class="table-responsive"> 
                 <table class="table table-hover table-bordered" id="itemTable">
                     <thead class="table-light">
                         <tr>
