@@ -1,29 +1,38 @@
-# Dashboard Improvement Plan
+# Login & Register Page Improvement Plan
 
-## ✅ Step 1: Update admin master layout
-- Rewrite `resources/views/admin/layouts/master.blade.php` to use a proper admin layout with sidebar, header, footer (instead of customer theme)
+## ✅ Step 1: Update auth CSS
+- Add auth page styles to `public/assets/customer/css/style.css`
+  - `.auth-card` modern card with shadow & rounded corners
+  - `.auth-side` gradient side banner
+  - `.auth-field` input group styling
+  - `.auth-toggle-password` show/hide password button
+  - `.auth-btn` submit button styling
+  - `.demo-account` clickable demo account cards
+  - `.strength-meter` password strength progress bar
+  - `.password-match` password match indicator
 
-## ✅ Step 2: Update AdminController with chart data
-- Add monthly revenue query for sales chart
-- Add recent orders query
-- Add top-selling items query
-- Add order status counts
-- Add hourly revenue data
+## ⬜ Step 2: Redesign login page
+- Rewrite `resources/views/auth/login.blade.php` with:
+  - Split card layout (gradient side banner + form)
+  - Show/hide password toggle
+  - Per-field validation errors
+  - Loading state on submit button
+  - Clickable demo accounts (auto-fill)
+  - Remember me checkbox
 
-## ✅ Step 3: Redesign dashboard view
-- Rewrite `resources/views/admin/index.blade.php` with:
-  - Modern gradient stat cards
-  - Sales chart (Chart.js)
-  - Recent orders table
-  - Top selling items
-  - Order status summary
-  - Hourly revenue chart
-  - Quick actions
-  - Responsive layout
+## ⬜ Step 3: Redesign register page
+- Rewrite `resources/views/auth/register.blade.php` with:
+  - Split card layout
+  - Show/hide password for both password fields
+  - Password strength meter
+  - Real-time password match validation
+  - Per-field validation errors
+  - Loading state on submit button
 
-## ✅ Step 4: Test
-- All files have been updated successfully
-- Admin layout clean with sidebar, header, footer
-- Chart.js loaded from local assets
-- Dashboard has gradient cards, charts, recent orders, top items, quick actions
+## ⬜ Step 4: Update AuthController
+- Add remember me support in login()
+
+## ⬜ Step 5: Test
+- Verify /login and /register render correctly
+- Test show/hide password, strength meter, match validation, demo fill, loading state
 
